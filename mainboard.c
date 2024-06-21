@@ -58,6 +58,9 @@ const osThreadAttr_t Display_attributes = {
 //static bool pump3flag = false;
 //static bool pump4flag = false;
 static bool pumpstopflag = false;
+uint32_t startTick = 0;
+uint32_t endTick = 0;
+int z=0;
 /* USER CODE END PV */
 
 /* Private function prototypes -----------------------------------------------*/
@@ -74,7 +77,15 @@ void StartDisplay(void *argument);
 void HAL_GPIO_EXTI_Callback(uint16_t GPIO_Pin) {
     if (pumpstopflag == false && TotalPetrol > 0) {
         if (GPIO_Pin == pump1_Pin) {
+
+        	z++;
+        	startTick = SysTick->VAL;
+
         	pump1count++;
+
+        	z++;
+        	endTick = SysTick->VAL;
+
         } else if (GPIO_Pin == pump2_Pin) {
         	pump2count++;
         } else if (GPIO_Pin == pump3_Pin) {

@@ -37,6 +37,10 @@ int pump1count = 0;
 int pump2count = 0;
 int TotalPetrol = 50000;
 int NOP = 5000;
+uint32_t startTick = 0;
+uint32_t endTick = 0;
+uint32_t timeTaken = 0;
+int z=0;
 
 // Define a debounce delay (in ms)
 #define DEBOUNCE_DELAY 500
@@ -48,7 +52,6 @@ volatile uint32_t last_pump2_press_time = 0;
 volatile uint32_t last_pump2_stop_press_time = 0;
 volatile uint32_t last_stop_pump_press_time = 0;
 
-uint32_t startTick, endTick;
 /* USER CODE END PD */
 
 /* Private macro -------------------------------------------------------------*/
@@ -181,12 +184,17 @@ void HAL_GPIO_EXTI_Callback(uint16_t GPIO_Pin){
 
 	//stop all
 	if (GPIO_Pin == stop_all_Pin){
+
 		pumpstopflag = true;
 	}
 
 	// pump1 start
 	else if (GPIO_Pin == pump1_Pin){
 		if ((current_time - last_pump1_press_time) > DEBOUNCE_DELAY){
+
+			startTick = SysTick->VAL;
+			z++;
+
 			last_pump1_press_time = current_time;
 			pump1flag = true;
 		}
@@ -465,22 +473,23 @@ void StartPump1(void *argument)
 
 		if(pump1flag && pumpstopflag == false && TotalPetrol > 0){
 
-			startTick = SysTick->VAL;
-
 			HAL_GPIO_WritePin(GPIOC, GPIO_PIN_8, GPIO_PIN_SET);
 			for (int i = 0; i<NOP; i++){
 				__NOP();
 			}
 			HAL_GPIO_WritePin(GPIOC, GPIO_PIN_8, GPIO_PIN_RESET);
 
-			endTick = SysTick->VAL;
 
 			osMutexAcquire(myMutex01Handle, osWaitForever);
 			TotalPetrol--;
 			pump1count++;
 			osMutexRelease(myMutex01Handle);
-		//osThreadYield();
+
+			endTick = SysTick->VAL;
+			timeTaken = (startTick >= endTick) ? (startTick - endTick) : (SysTick->LOAD + startTick - endTick);
+			z++;
 	}
+			osThreadYield();
   }
   /* USER CODE END 5 */
 }
@@ -511,6 +520,7 @@ void StartPump2(void *argument)
 			pump2count++;
 			osMutexRelease(myMutex01Handle);
 		}
+		osThreadYield();
   }
   /* USER CODE END StartPump2 */
 }

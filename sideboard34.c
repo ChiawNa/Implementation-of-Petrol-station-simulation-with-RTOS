@@ -474,6 +474,8 @@ void StartPump3(void *argument)
 		pump3count++;
 		osMutexRelease(myMutex01Handle);
 		}
+
+		osThreadYield();
   }
   /* USER CODE END 5 */
 }
@@ -504,6 +506,8 @@ void StartPump4(void *argument)
 		pump4count++;
 		osMutexRelease(myMutex01Handle);
 		}
+
+		osThreadYield();
   }
   /* USER CODE END StartPump4 */
 }
